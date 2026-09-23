@@ -1,0 +1,25 @@
+[
+  {"doc": "PW1_earlier_statement.txt", "page": 1, "para": 2, "actor": "Suresh", "event": "accused_arrives", "date": "12/13.03.2021", "time": "11 pm", "place": "shop",
+   "exact_quote": "On the intervening night of 12/13.03.2021 at about 11 pm, I was closing my shop when the accused Suresh came inside."},
+  {"doc": "PW1_earlier_statement.txt", "page": 1, "para": 3, "actor": "accused", "event": "money_taken", "amount": "Rs. 5,000",
+   "exact_quote": "Suresh demanded money from me. He took Rs. 5,000 from the cash box and ran towards the main road."},
+  {"doc": "PW1_earlier_statement.txt", "page": 1, "para": 4, "actor": "Mani", "event": "eyewitness_present",
+   "exact_quote": "My neighbour Mani was standing outside the shop and saw the accused running away."},
+  {"doc": "PW1_earlier_statement.txt", "page": 2, "para": 1, "actor": "complainant", "event": "complaint_filed",
+   "exact_quote": "I went to the Anna Nagar police station the next morning and gave this complaint."},
+  {"doc": "PW1_court_deposition.txt", "page": 1, "para": 2, "actor": "A-1", "event": "accused_arrives", "date": "12.03.2021", "time": "9 pm", "place": "house",
+   "exact_quote": "On 12.03.2021 at about 9 pm I was at my house when the accused Suresh came there."},
+  {"doc": "PW1_court_deposition.txt", "page": 1, "para": 3, "actor": "accused", "event": "threat_with_weapon",
+   "exact_quote": "The accused showed a knife and threatened to kill me."},
+  {"doc": "PW1_court_deposition.txt", "page": 1, "para": 4, "actor": "Suresh", "event": "money_taken", "amount": "Rs. 8,000",
+   "exact_quote": "The accused took Rs. 8,000 from me and ran away."},
+  {"doc": "PW2_earlier_statement.txt", "page": 1, "para": 2, "actor": "Suresh", "event": "accused_flees", "date": "12.03.2021", "time": "11 pm", "place": "shop",
+   "exact_quote": "On 12.03.2021 at about 11 pm I was standing near the shop of Ramesh Kumar. I saw Suresh running out of the shop towards the main road."},
+
+  {"doc": "PW1_court_deposition.txt", "page": 1, "para": 3, "actor": "accused", "event": "injury",
+   "exact_quote": "The accused stabbed me with the knife."},
+  {"doc": "PW1_court_deposition.txt", "page": 1, "para": 2, "actor": "Suresh", "event": "accused_arrives", "place": "shop",
+   "exact_quote": "On 12.03.2021 at about 9 pm I was at my house when the accused Suresh came there."},
+  {"doc": "PW1_court_deposition.txt", "page": 1, "para": 2, "actor": "Suresh", "event": "money_taken", "amount": "Rs. 8,000",
+   "exact_quote": "The accused took Rs. 8,000 from me and ran away."}
+]

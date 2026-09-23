@@ -1,0 +1,12 @@
+{
+  "documents": {
+    "PW1_earlier_statement.txt": {"witness": "Ramesh Kumar", "kind": "earlier", "date": "13.03.2021"},
+    "PW1_court_deposition.txt": {"witness": "Ramesh Kumar", "kind": "court", "date": "04.08.2022"},
+    "PW2_earlier_statement.txt": {"witness": "Mani", "kind": "earlier", "date": "13.03.2021"}
+  },
+  "aliases": {
+    "Ramesh Kumar": ["PW-1", "PW1", "complainant", "Ramesh"],
+    "Mani": ["PW-2", "PW2", "neighbour"],
+    "Suresh": ["A-1", "A1", "accused", "accused no. 1"]
+  }
+}
