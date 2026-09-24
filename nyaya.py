@@ -6,6 +6,9 @@ from pathlib import Path
 
 from datetime import date
 
+MATERIAL_HINTS = ("weapon", "knife", "threat", "injur", "kill", "eyewitness", "identif")
+
+
 def load_para(folder):
     # Returns {(filename,page,para): text} for every .txt file
 
@@ -82,7 +85,24 @@ def compare(a, b):
         diffs.append("amount")
     return diffs
 
-
+def find_omissions(good, docs):
+    # Events a witness mentioned in one statement but not in their other one
+    results = []
+    witnesses = {docs[c["doc"]]["witness"] for c in good}
+    for w in witnesses:
+        mine = [c for c in good if docs[c["doc"]]["witness"] == w]
+        earlier = {c["event"] for c in mine if docs[c["doc"]]["kind"] == "earlier"}
+        court = {c["event"] for c in mine if docs[c["doc"]]["kind"] == "court"}
+        if not earlier or not court:
+            continue  # need both statements to compare
+        for c in mine:
+            in_court = docs[c["doc"]]["kind"] == "court"
+            other_side = earlier if in_court else court
+            if c["event"] not in other_side:
+                material = any(h in c["event"] for h in MATERIAL_HINTS)
+                kind = "said first in Court, not told to police" if in_court else "told police, not repeated in Court"
+                results.append((material, w, kind, c))
+    return sorted(results, key=lambda r: not r[0])  # likely-material first
 
 # it verifies claims first and then compares the good ones
 
@@ -106,3 +126,10 @@ if __name__ == "__main__":
                     print(f"- {a['event']}: {', '.join(diffs)} differ")
                     print(f'    {a["doc"]} p.{a["page"]} para {a["para"]}: "{a["exact_quote"]}"')
                     print(f'    {b["doc"]} p.{b["page"]} para {b["para"]}: "{b["exact_quote"]}"')
+
+    docs = json.loads(open("sample_case/case.json", encoding="utf-8").read())["documents"]
+    print("\nOMISSIONS:")
+    for material, w, kind, c in find_omissions(good, docs):
+        label = "LIKELY MATERIAL" if material else "check materiality"
+        print(f"- [{label}] {w}: {kind}")
+        print(f'    {c["doc"]} p.{c["page"]} para {c["para"]}: "{c["exact_quote"]}"')
