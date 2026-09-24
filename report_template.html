@@ -1,0 +1,33 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Nyaya AI report</title>
+<style>
+  body { font: 16px/1.5 system-ui; max-width: 1000px; margin: 24px auto; padding: 0 16px; color: #1d2433; }
+  .card { border: 1px solid #d5dae3; border-radius: 8px; padding: 12px 16px; margin: 12px 0; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  blockquote { margin: 8px 0; padding: 8px 12px; background: #f4f6fa; border-left: 3px solid #3b5bdb; }
+  cite { display: block; font-size: 13px; color: #5b6475; }
+  .ok { border-color: #2f9e44; background: #f1fbf3; }
+  .no { opacity: .4; }
+</style>
+
+<h1>Nyaya AI report</h1>
+<p>$verified claims verified against the source, $rejected_count rejected.
+   Every item is a draft for the advocate to confirm or dismiss.</p>
+
+<h2>Contradictions ($contradiction_count)</h2>
+$contradictions
+
+<h2>Omissions ($omission_count)</h2>
+$omissions
+
+<h2>Rejected by verification ($rejected_count)</h2>
+<ul>$rejected</ul>
+
+<script>
+  function mark(btn, cls) {
+    const card = btn.closest('.card');
+    card.classList.remove('ok', 'no');
+    card.classList.add(cls);
+  }
+</script>

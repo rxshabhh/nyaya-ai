@@ -2,12 +2,16 @@
 
 import re
 import json
+import html
 from pathlib import Path
 
 from datetime import date
+from string import Template
 
 MATERIAL_HINTS = ("weapon", "knife", "threat", "injur", "kill", "eyewitness", "identif")
 
+BUTTONS = ('<div><button onclick="mark(this,\'ok\')">Confirm</button> '
+           '<button onclick="mark(this,\'no\')">Dismiss</button></div>')
 
 def load_para(folder):
     # Returns {(filename,page,para): text} for every .txt file
@@ -104,32 +108,57 @@ def find_omissions(good, docs):
                 results.append((material, w, kind, c))
     return sorted(results, key=lambda r: not r[0])  # likely-material first
 
+
+def cite(c):
+    return f'{c["doc"]} p.{c["page"]} para {c["para"]}'
+
+
+def quote(c):
+    return f'<blockquote>"{html.escape(c["exact_quote"])}"<cite>{html.escape(cite(c))}</cite></blockquote>'
+
+
+def build_report(good, rejected, contradictions, omissions):
+    cons = "".join(
+        f'<div class="card"><b>Contradiction: {", ".join(d)} differ</b>'
+        f'<div class="pair">{quote(a)}{quote(b)}</div>{BUTTONS}</div>'
+        for a, b, d in contradictions)
+    oms = "".join(
+        f'<div class="card"><b>{"Likely material" if m else "Check materiality"}: '
+        f'{html.escape(w)}, {k}</b>{quote(c)}{BUTTONS}</div>'
+        for m, w, k, c in omissions)
+    rej = "".join(f'<li>{html.escape(r)}: "{html.escape(c["exact_quote"])}"</li>' for c, r in rejected)
+
+    template = Template(Path("report_template.html").read_text(encoding="utf-8"))
+    return template.substitute(
+        verified=len(good), rejected_count=len(rejected),
+        contradiction_count=len(contradictions), contradictions=cons,
+        omission_count=len(omissions), omissions=oms, rejected=rej)
+
 # it verifies claims first and then compares the good ones
 
 if __name__ == "__main__":
     paras = load_para("sample_case")
     claims = json.loads(open("sample_case/claims.json", encoding="utf-8").read())
+    docs = json.loads(open("sample_case/case.json", encoding="utf-8").read())["documents"]
 
-    good = []
+    good, rejected = [], []
     for c in claims:
         reason = verify(c, paras)
-        print("REJECTED:" if reason else "OK:      ", c["exact_quote"][:50], reason or "")
-        if not reason:
+        if reason:
+            rejected.append((c, reason))
+        else:
             good.append(c)
 
-    print("\nCONTRADICTIONS:")
+    contradictions = []
     for i, a in enumerate(good):
         for b in good[i + 1:]:
             if a["event"] == b["event"] and a["doc"] != b["doc"]:
                 diffs = compare(a, b)
                 if diffs:
-                    print(f"- {a['event']}: {', '.join(diffs)} differ")
-                    print(f'    {a["doc"]} p.{a["page"]} para {a["para"]}: "{a["exact_quote"]}"')
-                    print(f'    {b["doc"]} p.{b["page"]} para {b["para"]}: "{b["exact_quote"]}"')
+                    contradictions.append((a, b, diffs))
 
-    docs = json.loads(open("sample_case/case.json", encoding="utf-8").read())["documents"]
-    print("\nOMISSIONS:")
-    for material, w, kind, c in find_omissions(good, docs):
-        label = "LIKELY MATERIAL" if material else "check materiality"
-        print(f"- [{label}] {w}: {kind}")
-        print(f'    {c["doc"]} p.{c["page"]} para {c["para"]}: "{c["exact_quote"]}"')
+    omissions = find_omissions(good, docs)
+
+    open("report.html", "w", encoding="utf-8").write(build_report(good, rejected, contradictions, omissions))
+    print(f"{len(good)} verified, {len(rejected)} rejected, "
+          f"{len(contradictions)} contradictions, {len(omissions)} omissions -> report.html")
