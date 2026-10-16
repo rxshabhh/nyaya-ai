@@ -142,6 +142,14 @@ python -m nyaya
 
 Then open `report.html` in a browser.
 
+Local API (the React UI comes next):
+
+```
+python -m nyaya serve
+```
+
+It prints a one-time token. The API listens on 127.0.0.1 only and every call needs that token.
+
 To reproduce the NPU benchmark (needs a free Qualcomm AI Hub account):
 
 ```

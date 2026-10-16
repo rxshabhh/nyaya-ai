@@ -41,7 +41,7 @@ class Store:
 
     @classmethod
     def open(cls, vault):
-        db = sqlite3.connect(":memory:")
+        db = sqlite3.connect(":memory:", check_same_thread=False)  # callers hold a lock; the API uses worker threads
         blob = vault.get_blob(BLOB)
         if blob:
             db.deserialize(blob)

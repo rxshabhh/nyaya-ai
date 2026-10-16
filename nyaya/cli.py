@@ -16,7 +16,11 @@ def run(folder):
 
 
 def main(argv=None):
-    folder = (argv or sys.argv[1:] or ["sample_case"])[0]
+    args = argv or sys.argv[1:]
+    if args[:1] == ["serve"]:
+        from .api import serve
+        return serve()
+    folder = (args or ["sample_case"])[0]
     try:
         good, rejected, cons, oms = run(folder)
     except ParseError as e:

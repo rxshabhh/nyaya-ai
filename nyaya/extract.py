@@ -52,10 +52,12 @@ def _parse(text):
     return data
 
 
-def extract_claims(paras, docs, generate, vocab=EVENT_VOCAB):
+def extract_claims(paras, docs, generate, vocab=EVENT_VOCAB, on_progress=None):
     # Citation (doc, page, para) and witness come from our code, never from the model.
     claims, errors = [], []
-    for (doc, page, para), text in paras.items():
+    for done, ((doc, page, para), text) in enumerate(paras.items(), 1):
+        if on_progress:
+            on_progress(done - 1, len(paras))
         where = {"doc": doc, "page": page, "para": para}
         try:
             items = _parse(generate(build_prompt(text, vocab)))
@@ -76,4 +78,6 @@ def extract_claims(paras, docs, generate, vocab=EVENT_VOCAB):
                 if it.get(f) not in (None, ""):
                     claim[f] = str(it[f])
             claims.append(claim)
+    if on_progress:
+        on_progress(len(paras), len(paras))
     return claims, errors
