@@ -42,11 +42,13 @@ def compare(a, b):
     return diffs
 
 
-def find_contradictions(good):
+def find_contradictions(good, docs):
+    # Same witness, same event, different documents
     out = []
     for i, a in enumerate(good):
         for b in good[i + 1:]:
-            if a["event"] == b["event"] and a["doc"] != b["doc"]:
+            same_witness = docs[a["doc"]]["witness"] == docs[b["doc"]]["witness"]
+            if same_witness and a["event"] == b["event"] and a["doc"] != b["doc"]:
                 diffs = compare(a, b)
                 if diffs:
                     out.append((a, b, diffs))

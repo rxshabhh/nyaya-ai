@@ -1,7 +1,6 @@
 {
   "verified": 7,
   "rejected": 0,
-  "xfail": "pairing ignores witness: PW1 and PW2 claims are compared with each other",
   "contradictions": [
     {
       "event": "accused_seen",

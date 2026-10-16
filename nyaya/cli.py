@@ -16,7 +16,7 @@ def run(folder):
     claims = json.loads((folder / "claims.json").read_text(encoding="utf-8"))
     docs = json.loads((folder / "case.json").read_text(encoding="utf-8"))["documents"]
     good, rejected = split_claims(claims, paras)
-    return good, rejected, find_contradictions(good), find_omissions(good, docs)
+    return good, rejected, find_contradictions(good, docs), find_omissions(good, docs)
 
 
 def main(argv=None):
