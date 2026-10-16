@@ -128,7 +128,13 @@ No real client data is used or stored.
 
 ## Run it
 
-Python 3.10+, standard library only.
+Python 3.10+.
+
+```
+pip install -r requirements.txt
+```
+
+Reads `.txt`, digital `.pdf` and `.docx`. Scanned PDFs are refused with a message (no OCR yet).
 
 ```
 python -m nyaya
@@ -156,7 +162,7 @@ docs/                     screenshots
 
 ## Dependencies
 
-- Prototype: Python 3.10+, standard library only (`re`, `json`, `html`, `string`, `pathlib`, `datetime`)
+- Pipeline: Python 3.10+, `pdfplumber`, `python-docx`
 - Benchmark: `qai-hub`, `torch`, `transformers`
 - Planned NPU stages: Qualcomm AI Hub, Qualcomm Genie, ONNX Runtime with the QNN execution provider
 

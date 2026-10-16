@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .compare import find_contradictions
 from .omissions import find_omissions
-from .parse import load_para
+from .parse import ParseError, load_para
 from .report import build_report
 from .verify import split_claims
 
@@ -21,7 +21,10 @@ def run(folder):
 
 def main(argv=None):
     folder = (argv or sys.argv[1:] or ["sample_case"])[0]
-    good, rejected, cons, oms = run(folder)
+    try:
+        good, rejected, cons, oms = run(folder)
+    except ParseError as e:
+        sys.exit(f"Cannot read case: {e}")
     Path("report.html").write_text(build_report(good, rejected, cons, oms), encoding="utf-8")
     print(f"{len(good)} verified, {len(rejected)} rejected, "
           f"{len(cons)} contradictions, {len(oms)} omissions -> report.html")
