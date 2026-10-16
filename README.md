@@ -128,7 +128,7 @@ No real client data is used or stored.
 
 ## Run it
 
-Python 3.10+.
+Python 3.11+.
 
 ```
 pip install -r requirements.txt
@@ -162,7 +162,7 @@ docs/                     screenshots
 
 ## Dependencies
 
-- Pipeline: Python 3.10+, `pdfplumber`, `python-docx`
+- Pipeline: Python 3.11+, `pdfplumber`, `python-docx`
 - Benchmark: `qai-hub`, `torch`, `transformers`
 - Planned NPU stages: Qualcomm AI Hub, Qualcomm Genie, ONNX Runtime with the QNN execution provider
 

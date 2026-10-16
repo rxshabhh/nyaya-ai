@@ -1,3 +1,7 @@
+def omission_code(label):  # stable machine name for the human label find_omissions returns
+    return "court_only" if label.startswith("said first") else "earlier_only"
+
+
 MATERIAL_HINTS = ("weapon", "knife", "threat", "injur", "kill", "eyewitness", "identif")
 
 

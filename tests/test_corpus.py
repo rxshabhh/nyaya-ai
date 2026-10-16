@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from nyaya.cli import run
+from nyaya.omissions import omission_code
 
 
 def actual(folder):
@@ -15,7 +16,7 @@ def actual(folder):
     return {
         "verified": len(good), "rejected": len(rejected),
         "contradictions": {(a["event"], tuple(sorted(d))) for a, _, d in cons},
-        "omissions": {(w, c["event"], "court_only" if k.startswith("said first") else "earlier_only", m)
+        "omissions": {(w, c["event"], omission_code(k), m)
                       for m, w, k, c in oms},
     }
 

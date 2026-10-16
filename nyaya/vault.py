@@ -4,6 +4,7 @@ Layout (nothing on disk is readable without the passphrase):
     vault.json      KDF settings and the data key, encrypted with a key derived from the passphrase
     manifest.enc    document names and metadata, encrypted with the data key
     files/<id>.enc  one encrypted document per random id
+    state/<name>.enc  named encrypted blobs (the findings database); names are fixed by the code, never user data
 """
 import base64
 import json
@@ -20,7 +21,7 @@ from .parse import build_paras
 
 DEFAULT_KDF = {"time": 3, "memory_kib": 65536, "parallelism": 4}  # Argon2id, 64 MiB
 MIN_PASSPHRASE = 8
-AAD_KEY, AAD_MANIFEST, AAD_FILE = b"nyaya-v1:key", b"nyaya-v1:manifest", b"nyaya-v1:file:"
+AAD_KEY, AAD_MANIFEST, AAD_FILE, AAD_BLOB = b"nyaya-v1:key", b"nyaya-v1:manifest", b"nyaya-v1:file:", b"nyaya-v1:blob:"
 
 
 class VaultError(Exception):
@@ -138,6 +139,24 @@ class Vault:
             raise VaultError("no such document")
         self._save_manifest()
         (self.path / "files" / f"{doc_id}.enc").unlink(missing_ok=True)
+
+    def docs(self):
+        # {filename: metadata} in the shape the pipeline expects
+        return {m["name"]: {k: v for k, v in m.items() if k != "name"} for m in self.manifest["documents"].values()}
+
+    def put_blob(self, name, data):
+        (self.path / "state").mkdir(exist_ok=True)
+        _write(self.path / "state" / f"{name}.enc", _seal(self.key, data, AAD_BLOB + name.encode()))
+
+    def get_blob(self, name):
+        try:
+            blob = (self.path / "state" / f"{name}.enc").read_bytes()
+        except FileNotFoundError:
+            return None
+        try:
+            return _unseal(self.key, blob, AAD_BLOB + name.encode())
+        except InvalidTag:
+            raise CorruptVault(f"saved state '{name}' failed its integrity check")
 
     def change_passphrase(self, new):
         # Only the wrapped data key is rewritten; the documents stay as they are
