@@ -42,13 +42,21 @@ def compare(a, b):
     return diffs
 
 
-def find_contradictions(good, docs):
+def same_event(a, b, similar=None):
+    # Vocabulary labels pair by equality. "other" claims pair only if an embedder says their quotes match;
+    # without one they cannot be paired at all.
+    if a["event"] != "other" or b["event"] != "other":
+        return a["event"] == b["event"]
+    return bool(similar and similar(a, b))
+
+
+def find_contradictions(good, docs, similar=None):
     # Same witness, same event, different documents
     out = []
     for i, a in enumerate(good):
         for b in good[i + 1:]:
             same_witness = docs[a["doc"]]["witness"] == docs[b["doc"]]["witness"]
-            if same_witness and a["event"] == b["event"] and a["doc"] != b["doc"]:
+            if same_witness and a["doc"] != b["doc"] and same_event(a, b, similar):
                 diffs = compare(a, b)
                 if diffs:
                     out.append((a, b, diffs))
