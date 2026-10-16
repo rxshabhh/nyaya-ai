@@ -131,7 +131,7 @@ No real client data is used or stored.
 Python 3.10+, standard library only.
 
 ```
-python nyaya.py
+python -m nyaya
 ```
 
 Then open `report.html` in a browser.
@@ -147,8 +147,8 @@ python benchmarks/profile_embedder.py
 ## Repository
 
 ```
-nyaya.py                  pipeline: load, verify, compare, find omissions, build report
-report_template.html      report layout
+nyaya/                    pipeline package: parse, verify, compare, omissions, report, cli
+tests/                    golden test on the sample case
 sample_case/              fictional case: statements, case.json, claims.json
 benchmarks/               Qualcomm AI Hub profiling script
 docs/                     screenshots
