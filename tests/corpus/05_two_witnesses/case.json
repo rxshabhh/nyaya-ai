@@ -1,0 +1,23 @@
+{
+  "documents": {
+    "KS_police.txt": {
+      "witness": "Kiran Shah",
+      "kind": "earlier",
+      "doctype": "police_statement",
+      "date": "08.07.2022"
+    },
+    "KS_cross.txt": {
+      "witness": "Kiran Shah",
+      "kind": "court",
+      "doctype": "cross_examination",
+      "date": "15.03.2023"
+    },
+    "FK_police.txt": {
+      "witness": "Farid Khan",
+      "kind": "earlier",
+      "doctype": "police_statement",
+      "date": "08.07.2022"
+    }
+  },
+  "aliases": {}
+}

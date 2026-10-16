@@ -1,0 +1,73 @@
+[
+  {
+    "doc": "MI_fir.txt",
+    "page": 1,
+    "para": 1,
+    "witness": "Meena Iyer",
+    "actor": "Meena Iyer",
+    "event": "advance_given",
+    "exact_quote": "I, Meena Iyer, gave Rs. 3,50,000 to the accused Prakash on 21.08.2021 at his office as an advance for flat booking.",
+    "date": "21.08.2021",
+    "place": "office",
+    "amount": "Rs. 3,50,000"
+  },
+  {
+    "doc": "MI_fir.txt",
+    "page": 1,
+    "para": 2,
+    "witness": "Meena Iyer",
+    "actor": "Meena Iyer",
+    "event": "cheque_issued",
+    "exact_quote": "He gave me a cheque dated 25.08.2021 which bounced when I presented it.",
+    "date": "25.08.2021"
+  },
+  {
+    "doc": "MI_fir.txt",
+    "page": 1,
+    "para": 3,
+    "witness": "Meena Iyer",
+    "actor": "Meena Iyer",
+    "event": "promise_to_return",
+    "exact_quote": "He promised to return the money within one week."
+  },
+  {
+    "doc": "MI_fir.txt",
+    "page": 1,
+    "para": 3,
+    "witness": "Meena Iyer",
+    "actor": "Meena Iyer",
+    "event": "advance_given",
+    "exact_quote": "I, Meena Iyer, gave Rs. 3,50,000 to the accused Prakash on 21.08.2021 at his office as an advance for flat booking."
+  },
+  {
+    "doc": "MI_court.txt",
+    "page": 1,
+    "para": 1,
+    "witness": "Meena Iyer",
+    "actor": "Meena Iyer",
+    "event": "advance_given",
+    "exact_quote": "I gave Rs. 3,00,000 to the accused Prakash on 21.08.2021 at his office as an advance for flat booking.",
+    "date": "21.08.2021",
+    "place": "office",
+    "amount": "Rs. 3,00,000"
+  },
+  {
+    "doc": "MI_court.txt",
+    "page": 1,
+    "para": 2,
+    "witness": "Meena Iyer",
+    "actor": "Meena Iyer",
+    "event": "cheque_issued",
+    "exact_quote": "He gave me a cheque dated 25.08.2021 which bounced when I presented it.",
+    "date": "25.08.2021"
+  },
+  {
+    "doc": "MI_court.txt",
+    "page": 1,
+    "para": 3,
+    "witness": "Meena Iyer",
+    "actor": "Meena Iyer",
+    "event": "threat_made",
+    "exact_quote": "The accused threatened me when I asked for the money back."
+  }
+]

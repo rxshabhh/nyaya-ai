@@ -1,0 +1,17 @@
+{
+  "documents": {
+    "AV_police.txt": {
+      "witness": "Anil Verma",
+      "kind": "earlier",
+      "doctype": "police_statement",
+      "date": "15.06.2022"
+    },
+    "AV_court.txt": {
+      "witness": "Anil Verma",
+      "kind": "court",
+      "doctype": "examination_in_chief",
+      "date": "20.02.2023"
+    }
+  },
+  "aliases": {}
+}

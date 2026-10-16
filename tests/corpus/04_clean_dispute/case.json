@@ -1,0 +1,17 @@
+{
+  "documents": {
+    "SR_police.txt": {
+      "witness": "Savita Rao",
+      "kind": "earlier",
+      "doctype": "police_statement",
+      "date": "10.01.2022"
+    },
+    "SR_court.txt": {
+      "witness": "Savita Rao",
+      "kind": "court",
+      "doctype": "examination_in_chief",
+      "date": "12.12.2022"
+    }
+  },
+  "aliases": {}
+}

@@ -1,0 +1,27 @@
+{
+  "verified": 7,
+  "rejected": 0,
+  "xfail": "pairing ignores witness: PW1 and PW2 claims are compared with each other",
+  "contradictions": [
+    {
+      "event": "accused_seen",
+      "fields": [
+        "date"
+      ]
+    }
+  ],
+  "omissions": [
+    {
+      "witness": "Kiran Shah",
+      "event": "weapon_carried",
+      "kind": "earlier_only",
+      "material": true
+    },
+    {
+      "witness": "Kiran Shah",
+      "event": "identification_of_accused",
+      "kind": "court_only",
+      "material": true
+    }
+  ]
+}

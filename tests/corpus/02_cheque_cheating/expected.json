@@ -1,0 +1,26 @@
+{
+  "verified": 6,
+  "rejected": 1,
+  "contradictions": [
+    {
+      "event": "advance_given",
+      "fields": [
+        "amount"
+      ]
+    }
+  ],
+  "omissions": [
+    {
+      "witness": "Meena Iyer",
+      "event": "promise_to_return",
+      "kind": "earlier_only",
+      "material": false
+    },
+    {
+      "witness": "Meena Iyer",
+      "event": "threat_made",
+      "kind": "court_only",
+      "material": true
+    }
+  ]
+}

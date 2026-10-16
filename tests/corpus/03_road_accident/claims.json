@@ -1,0 +1,61 @@
+[
+  {
+    "doc": "JD_police.txt",
+    "page": 1,
+    "para": 1,
+    "witness": "Joseph Dsouza",
+    "actor": "Joseph Dsouza",
+    "event": "truck_hits_motorcycle",
+    "exact_quote": "On the night of 3/4.11.2022 I was returning from work when a truck hit a motorcycle near the railway crossing.",
+    "date": "3/4.11.2022",
+    "place": "railway crossing"
+  },
+  {
+    "doc": "JD_police.txt",
+    "page": 1,
+    "para": 2,
+    "witness": "Joseph Dsouza",
+    "actor": "Joseph Dsouza",
+    "event": "driver_flees",
+    "exact_quote": "The truck driver did not stop and drove away towards Kalyan road.",
+    "place": "Kalyan road"
+  },
+  {
+    "doc": "JD_police.txt",
+    "page": 1,
+    "para": 3,
+    "witness": "Joseph Dsouza",
+    "actor": "Joseph Dsouza",
+    "event": "injury_to_rider",
+    "exact_quote": "I saw the rider lying on the road with a head injury."
+  },
+  {
+    "doc": "JD_court.txt",
+    "page": 1,
+    "para": 1,
+    "witness": "Joseph Dsouza",
+    "actor": "Joseph Dsouza",
+    "event": "truck_hits_motorcycle",
+    "exact_quote": "On 4.11.2022 I was returning from work when a truck hit a motorcycle near the bus depot.",
+    "date": "4.11.2022",
+    "place": "bus depot"
+  },
+  {
+    "doc": "JD_court.txt",
+    "page": 1,
+    "para": 2,
+    "witness": "Joseph Dsouza",
+    "actor": "Joseph Dsouza",
+    "event": "driver_flees",
+    "exact_quote": "The truck driver did not stop and drove away."
+  },
+  {
+    "doc": "JD_court.txt",
+    "page": 1,
+    "para": 3,
+    "witness": "Joseph Dsouza",
+    "actor": "Joseph Dsouza",
+    "event": "rider_on_road",
+    "exact_quote": "The rider was lying on the road."
+  }
+]

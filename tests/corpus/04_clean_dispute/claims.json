@@ -1,0 +1,76 @@
+[
+  {
+    "doc": "SR_police.txt",
+    "page": 1,
+    "para": 1,
+    "witness": "Savita Rao",
+    "actor": "Savita Rao",
+    "event": "accused_arrives",
+    "exact_quote": "On 09.01.2022 at about 6.15 pm the accused Dinesh came to my house and abused me.",
+    "date": "09.01.2022",
+    "time": "6.15 pm",
+    "place": "house"
+  },
+  {
+    "doc": "SR_police.txt",
+    "page": 1,
+    "para": 1,
+    "witness": "Savita Rao",
+    "actor": "Savita Rao",
+    "event": "accused_arrives",
+    "exact_quote": "On 09.01.2022 at about 6.15 pm the accused Dinesh came to my house and abused me.",
+    "date": "09.01.2022",
+    "time": "6.15 pm",
+    "place": "market"
+  },
+  {
+    "doc": "SR_police.txt",
+    "page": 1,
+    "para": 2,
+    "witness": "Savita Rao",
+    "actor": "Savita Rao",
+    "event": "gate_broken",
+    "exact_quote": "He broke the gate of my house, which I had bought for Rs. 4,500.",
+    "amount": "Rs. 4,500"
+  },
+  {
+    "doc": "SR_police.txt",
+    "page": 1,
+    "para": 3,
+    "witness": "Savita Rao",
+    "actor": "Savita Rao",
+    "event": "neighbour_present",
+    "exact_quote": "My neighbour Lata was standing outside when this happened."
+  },
+  {
+    "doc": "SR_court.txt",
+    "page": 1,
+    "para": 1,
+    "witness": "Savita Rao",
+    "actor": "Savita Rao",
+    "event": "accused_arrives",
+    "exact_quote": "On 09.01.2022 at about 6.30 pm the accused Dinesh came to my house and abused me.",
+    "date": "09.01.2022",
+    "time": "6.30 pm",
+    "place": "house"
+  },
+  {
+    "doc": "SR_court.txt",
+    "page": 1,
+    "para": 2,
+    "witness": "Savita Rao",
+    "actor": "Savita Rao",
+    "event": "gate_broken",
+    "exact_quote": "He broke the gate of my house, which I bought for Rs. 4,500.",
+    "amount": "Rs. 4,500"
+  },
+  {
+    "doc": "SR_court.txt",
+    "page": 1,
+    "para": 3,
+    "witness": "Savita Rao",
+    "actor": "Savita Rao",
+    "event": "neighbour_present",
+    "exact_quote": "My neighbour Lata was standing outside when this happened."
+  }
+]

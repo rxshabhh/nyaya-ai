@@ -1,0 +1,17 @@
+{
+  "documents": {
+    "JD_police.txt": {
+      "witness": "Joseph Dsouza",
+      "kind": "earlier",
+      "doctype": "police_statement",
+      "date": "05.11.2022"
+    },
+    "JD_court.txt": {
+      "witness": "Joseph Dsouza",
+      "kind": "court",
+      "doctype": "examination_in_chief",
+      "date": "09.05.2023"
+    }
+  },
+  "aliases": {}
+}

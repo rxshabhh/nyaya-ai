@@ -1,0 +1,93 @@
+[
+  {
+    "doc": "AV_police.txt",
+    "page": 1,
+    "para": 1,
+    "witness": "Anil Verma",
+    "actor": "Anil Verma",
+    "event": "shop_ownership",
+    "exact_quote": "I run a grocery shop at Gandhi Chowk.",
+    "place": "Gandhi Chowk"
+  },
+  {
+    "doc": "AV_police.txt",
+    "page": 1,
+    "para": 2,
+    "witness": "Anil Verma",
+    "actor": "Anil Verma",
+    "event": "men_enter",
+    "exact_quote": "On 14.06.2022 at about 10 pm I was closing my shop when two men entered the shop.",
+    "date": "14.06.2022",
+    "time": "10 pm",
+    "place": "shop"
+  },
+  {
+    "doc": "AV_police.txt",
+    "page": 1,
+    "para": 3,
+    "witness": "Anil Verma",
+    "actor": "Anil Verma",
+    "event": "weapon_shown",
+    "exact_quote": "One of them showed a pistol and demanded the cash box."
+  },
+  {
+    "doc": "AV_police.txt",
+    "page": 1,
+    "para": 4,
+    "witness": "Anil Verma",
+    "actor": "Anil Verma",
+    "event": "cash_taken",
+    "exact_quote": "They took Rs. 12,000 from the cash box and ran away",
+    "amount": "Rs. 12,000"
+  },
+  {
+    "doc": "AV_police.txt",
+    "page": 1,
+    "para": 4,
+    "witness": "Anil Verma",
+    "actor": "Anil Verma",
+    "event": "gold_chain_taken",
+    "exact_quote": "They also stole a gold chain."
+  },
+  {
+    "doc": "AV_court.txt",
+    "page": 1,
+    "para": 1,
+    "witness": "Anil Verma",
+    "actor": "Anil Verma",
+    "event": "shop_ownership",
+    "exact_quote": "I run a grocery shop at Gandhi Chowk.",
+    "place": "Gandhi Chowk"
+  },
+  {
+    "doc": "AV_court.txt",
+    "page": 1,
+    "para": 2,
+    "witness": "Anil Verma",
+    "actor": "Anil Verma",
+    "event": "men_enter",
+    "exact_quote": "On 14.06.2022 at about 8 pm I was closing my shop when two men entered the shop.",
+    "date": "14.06.2022",
+    "time": "8 pm",
+    "place": "shop"
+  },
+  {
+    "doc": "AV_court.txt",
+    "page": 1,
+    "para": 3,
+    "witness": "Anil Verma",
+    "actor": "Anil Verma",
+    "event": "cash_taken",
+    "exact_quote": "They took Rs. 12,000 from the cash box and ran away",
+    "amount": "Rs. 12,000"
+  },
+  {
+    "doc": "AV_court.txt",
+    "page": 1,
+    "para": 4,
+    "witness": "Anil Verma",
+    "actor": "Anil Verma",
+    "event": "identification_of_accused",
+    "exact_quote": "I identified the accused Rakesh in the test identification parade."
+  }
+]

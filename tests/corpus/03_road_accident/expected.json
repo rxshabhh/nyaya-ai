@@ -1,0 +1,26 @@
+{
+  "verified": 6,
+  "rejected": 0,
+  "contradictions": [
+    {
+      "event": "truck_hits_motorcycle",
+      "fields": [
+        "place"
+      ]
+    }
+  ],
+  "omissions": [
+    {
+      "witness": "Joseph Dsouza",
+      "event": "injury_to_rider",
+      "kind": "earlier_only",
+      "material": true
+    },
+    {
+      "witness": "Joseph Dsouza",
+      "event": "rider_on_road",
+      "kind": "court_only",
+      "material": false
+    }
+  ]
+}

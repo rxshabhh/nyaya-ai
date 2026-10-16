@@ -1,0 +1,17 @@
+{
+  "documents": {
+    "MI_fir.txt": {
+      "witness": "Meena Iyer",
+      "kind": "earlier",
+      "doctype": "fir",
+      "date": "03.09.2021"
+    },
+    "MI_court.txt": {
+      "witness": "Meena Iyer",
+      "kind": "court",
+      "doctype": "examination_in_chief",
+      "date": "11.01.2023"
+    }
+  },
+  "aliases": {}
+}

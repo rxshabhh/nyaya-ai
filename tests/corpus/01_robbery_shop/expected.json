@@ -1,0 +1,26 @@
+{
+  "verified": 8,
+  "rejected": 1,
+  "contradictions": [
+    {
+      "event": "men_enter",
+      "fields": [
+        "time"
+      ]
+    }
+  ],
+  "omissions": [
+    {
+      "witness": "Anil Verma",
+      "event": "weapon_shown",
+      "kind": "earlier_only",
+      "material": true
+    },
+    {
+      "witness": "Anil Verma",
+      "event": "identification_of_accused",
+      "kind": "court_only",
+      "material": true
+    }
+  ]
+}

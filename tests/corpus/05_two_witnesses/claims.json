@@ -1,0 +1,74 @@
+[
+  {
+    "doc": "KS_police.txt",
+    "page": 1,
+    "para": 1,
+    "witness": "Kiran Shah",
+    "actor": "Kiran Shah",
+    "event": "accused_seen",
+    "exact_quote": "On 06.07.2022 at about 7 am I saw the accused Gopal near the temple.",
+    "date": "06.07.2022",
+    "time": "7 am",
+    "place": "temple"
+  },
+  {
+    "doc": "KS_police.txt",
+    "page": 1,
+    "para": 2,
+    "witness": "Kiran Shah",
+    "actor": "Kiran Shah",
+    "event": "weapon_carried",
+    "exact_quote": "He was carrying a stick."
+  },
+  {
+    "doc": "KS_police.txt",
+    "page": 1,
+    "para": 3,
+    "witness": "Kiran Shah",
+    "actor": "Kiran Shah",
+    "event": "village_head_informed",
+    "exact_quote": "I told the village head about it."
+  },
+  {
+    "doc": "KS_cross.txt",
+    "page": 1,
+    "para": 1,
+    "witness": "Kiran Shah",
+    "actor": "Kiran Shah",
+    "event": "accused_seen",
+    "exact_quote": "On 07.07.2022 at about 7 am I saw the accused Gopal near the temple.",
+    "date": "07.07.2022",
+    "time": "7 am",
+    "place": "temple"
+  },
+  {
+    "doc": "KS_cross.txt",
+    "page": 1,
+    "para": 2,
+    "witness": "Kiran Shah",
+    "actor": "Kiran Shah",
+    "event": "identification_of_accused",
+    "exact_quote": "I am sure I can identify him."
+  },
+  {
+    "doc": "KS_cross.txt",
+    "page": 1,
+    "para": 3,
+    "witness": "Kiran Shah",
+    "actor": "Kiran Shah",
+    "event": "village_head_informed",
+    "exact_quote": "I told the village head about it."
+  },
+  {
+    "doc": "FK_police.txt",
+    "page": 1,
+    "para": 1,
+    "witness": "Farid Khan",
+    "actor": "Farid Khan",
+    "event": "accused_seen",
+    "exact_quote": "On 06.07.2022 at about 7 am I saw the accused Gopal near the well.",
+    "date": "06.07.2022",
+    "time": "7 am",
+    "place": "well"
+  }
+]
