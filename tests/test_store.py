@@ -34,6 +34,8 @@ with tempfile.TemporaryDirectory() as tmp:
     run_into(store, vault, claims)
     assert store.counts() == {"verified": 8, "rejected": 3, "contradictions": 2, "omissions": 3}
     assert all(f["state"] == "open" for f in store.findings())
+    assert sorted(f["kind"] for f in store.findings()) == ["contradiction"] * 2 + ["omission"] * 3
+    assert {f["omission"] for f in store.findings() if f["kind"] == "omission"} <= {"court_only", "earlier_only"}
     assert len(store.claims("rejected")) == 3
 
     # confirm one, dismiss another; reopen from disk with the passphrase

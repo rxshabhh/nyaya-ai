@@ -19,7 +19,7 @@ def main(argv=None):
     args = argv or sys.argv[1:]
     if args[:1] == ["serve"]:
         from .api import serve
-        return serve()
+        return serve(browser="--no-browser" not in args)
     folder = (args or ["sample_case"])[0]
     try:
         good, rejected, cons, oms = run(folder)

@@ -5,13 +5,17 @@ import os
 import re
 import secrets
 import shutil
+import tempfile
 import threading
 import time
+import zipfile
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from starlette.background import BackgroundTask
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .backends import BackendUnavailable, ollama_embed, ollama_generate
@@ -24,8 +28,13 @@ from .vault import Vault, VaultError, WrongPassphrase
 DOCTYPES = {"police_statement": "earlier", "fir": "earlier", "chargesheet": "earlier",
             "examination_in_chief": "court", "cross_examination": "court"}
 MAX_UPLOAD = 50 * 1024 * 1024
+MAX_ARCHIVE = 2 * 1024 ** 3  # unpacked size cap for an imported .nyaya file
 IDLE_SECONDS = 15 * 60
 DEMO = Path(__file__).resolve().parent.parent / "sample_case"
+WEB = Path(__file__).resolve().parent / "web"  # React build output (ui/ -> npm run build)
+# The page shows privileged text: only our own scripts, no external fetches, no framing
+CSP = ("default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; "
+       "connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'")
 
 
 class Session:
@@ -146,7 +155,10 @@ def create_app(data_dir, token, port=8765, idle_seconds=IDLE_SECONDS, kdf=None, 
         origin = request.headers.get("origin")
         if origin and origin not in origins:
             return JSONResponse({"detail": "bad origin"}, status_code=403)  # blocks other websites
-        return await call_next(request)
+        response = await call_next(request)
+        response.headers["Content-Security-Policy"] = CSP
+        response.headers["Referrer-Policy"] = "no-referrer"
+        return response
 
     app.add_middleware(CORSMiddleware, allow_origins=sorted(origins), allow_methods=["*"],
                        allow_headers=["X-Nyaya-Token", "Content-Type"])
@@ -181,6 +193,49 @@ def create_app(data_dir, token, port=8765, idle_seconds=IDLE_SECONDS, kdf=None, 
         claims = json.loads((DEMO / "claims.json").read_text(encoding="utf-8"))
         s.store.save_analysis(*analyze(claims, s.vault.paras(), s.vault.docs()), s.vault.docs())
         return {"id": case_id, "label": "Demo case"}
+
+    @api.get("/cases/{case_id}/export")
+    def export_case(case_id: str):
+        # The vault is already encrypted, so the archive is just its files in a zip. No unlock needed.
+        known(case_id)
+        s = sessions.get(case_id)
+        tmp = tempfile.NamedTemporaryFile(suffix=".nyaya", delete=False)
+        tmp.close()
+        with s.lock if s else threading.RLock():  # no write lands halfway through the copy
+            with zipfile.ZipFile(tmp.name, "w", zipfile.ZIP_STORED) as z:
+                for f in sorted(case_path(case_id).rglob("*")):
+                    if f.is_file():
+                        z.write(f, f.relative_to(case_path(case_id)).as_posix())
+        name = re.sub(r"[^\w.-]+", "_", load_registry()[case_id]["label"]) or "case"
+        return FileResponse(tmp.name, media_type="application/octet-stream", filename=f"{name}.nyaya",
+                            background=BackgroundTask(os.unlink, tmp.name))
+
+    @api.post("/cases/import", status_code=201)
+    def import_case(file: UploadFile = File(...), label: str = Form(...)):
+        case_id = secrets.token_hex(8)
+        dest = case_path(case_id)
+        try:
+            with zipfile.ZipFile(file.file) as z:
+                names = z.namelist()
+                ok = lambda n: n in ("vault.json", "manifest.enc") or re.fullmatch(r"(files|state)/[\w.-]+\.enc", n)
+                if "vault.json" not in names or not all(ok(n) for n in names):  # also rejects ../ and absolute paths
+                    raise HTTPException(422, "this is not a Nyaya AI case archive")
+                if sum(i.file_size for i in z.infolist()) > MAX_ARCHIVE:
+                    raise HTTPException(413, "archive is too large")
+                for n in names:
+                    (dest / n).parent.mkdir(parents=True, exist_ok=True)
+                    (dest / n).write_bytes(z.read(n))
+        except zipfile.BadZipFile:
+            shutil.rmtree(dest, ignore_errors=True)
+            raise HTTPException(422, "this is not a Nyaya AI case archive")
+        except HTTPException:
+            shutil.rmtree(dest, ignore_errors=True)
+            raise
+        with reg_lock:
+            reg = load_registry()
+            reg[case_id] = {"label": label.strip() or "Imported case"}
+            save_registry(reg)
+        return {"id": case_id, "label": reg[case_id]["label"]}  # still locked: needs its passphrase
 
     @api.post("/cases/{case_id}/unlock")
     def unlock(case_id: str, body: Passphrase):
@@ -296,6 +351,8 @@ def create_app(data_dir, token, port=8765, idle_seconds=IDLE_SECONDS, kdf=None, 
         return {"key": key, "state": body.state}
 
     app.include_router(api)
+    if WEB.is_dir():
+        app.mount("/", StaticFiles(directory=WEB, html=True), name="web")
     return app
 
 
@@ -303,9 +360,15 @@ def default_data_dir():
     return Path(os.environ.get("LOCALAPPDATA") or Path.home()) / "NyayaAI"
 
 
-def serve(port=8765, data_dir=None):
+def serve(port=8765, data_dir=None, browser=True):
     import uvicorn
+    import webbrowser
     token = secrets.token_urlsafe(32)
     app = create_app(data_dir or default_data_dir(), token, port)
-    print(f"Nyaya AI API on http://127.0.0.1:{port}/  (token: {token})", flush=True)
+    url = f"http://127.0.0.1:{port}/#token={token}"  # fragment: never sent to the server or written to logs
+    print(f"Nyaya AI on {url}", flush=True)
+    if not WEB.is_dir():
+        print("UI not built yet: cd ui && npm install && npm run build  (the API works without it)", flush=True)
+    elif browser:
+        threading.Timer(1.0, webbrowser.open, [url]).start()
     uvicorn.run(app, host="127.0.0.1", port=port, log_level="warning")

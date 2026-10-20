@@ -125,6 +125,30 @@ with tempfile.TemporaryDirectory() as tmp:
     assert c.get(f"/api/cases/{demo}/results", headers=H).json()["counts"] == \
         {"verified": 8, "rejected": 3, "contradictions": 2, "omissions": 3}
 
+# archive: export a case, import it as a new locked case, open it with the same passphrase
+with tempfile.TemporaryDirectory() as tmp:
+    import io
+    import zipfile
+    c = make_client(tmp)
+    case = c.post("/api/demo", headers=H, json={"passphrase": PASS}).json()["id"]
+    raw = c.get(f"/api/cases/{case}/export", headers=H)
+    assert raw.status_code == 200 and "Demo_case.nyaya" in raw.headers["content-disposition"]
+    arc = zipfile.ZipFile(io.BytesIO(raw.content))
+    assert not any(b"Suresh" in arc.read(n) for n in arc.namelist())
+    bad = io.BytesIO()
+    with zipfile.ZipFile(bad, "w") as z:
+        z.writestr("vault.json", "{}")
+        z.writestr("../evil.txt", "x")
+    imp = lambda data: c.post("/api/cases/import", headers=H, data={"label": "Restored"}, files={"file": ("a.nyaya", data)})
+    assert imp(bad.getvalue()).status_code == 422 and imp(b"not a zip").status_code == 422
+    assert not (Path(tmp) / "evil.txt").exists() and not (Path(tmp) / "cases" / "evil.txt").exists()
+    new = imp(raw.content).json()["id"]
+    assert new != case and c.get(f"/api/cases/{new}/results", headers=H).status_code == 423  # imported locked
+    c.post(f"/api/cases/{case}/lock", headers=H)
+    assert c.post(f"/api/cases/{new}/unlock", headers=H, json={"passphrase": "wrong wrong"}).status_code == 401
+    assert c.post(f"/api/cases/{new}/unlock", headers=H, json={"passphrase": PASS}).status_code == 200
+    assert c.get(f"/api/cases/{new}/results", headers=H).json()["counts"]["contradictions"] == 2
+
 # auto-lock after idle
 with tempfile.TemporaryDirectory() as tmp:
     c = make_client(tmp, idle_seconds=0.2)

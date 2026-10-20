@@ -223,3 +223,6 @@ report.html
 order.md
 decision.md
 execution-flow.md
+
+# React build output (ui/ -> npm run build)
+nyaya/web/

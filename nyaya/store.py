@@ -70,7 +70,7 @@ class Store:
         for material, w, label, c in omissions:
             kind = omission_code(label)
             found.append((_key("omission", w, c["event"], kind, _cite(c)),
-                          "omission", {"witness": w, "kind": kind, "material": material, "claim": c}))
+                          "omission", {"witness": w, "omission": kind, "material": material, "claim": c}))
         db.executemany(
             "INSERT INTO findings (key, kind, payload, updated) VALUES (?,?,?,?) "
             "ON CONFLICT(key) DO UPDATE SET payload = excluded.payload, stale = 0",
@@ -81,7 +81,7 @@ class Store:
         rows = self.db.execute(
             "SELECT key, kind, state, stale, payload, updated FROM findings "
             + ("" if include_stale else "WHERE stale = 0 ") + "ORDER BY kind, rowid").fetchall()
-        return [{"key": k, "kind": kind, "state": s, "stale": bool(st), "updated": u, **json.loads(p)}
+        return [{**json.loads(p), "key": k, "kind": kind, "state": s, "stale": bool(st), "updated": u}
                 for k, kind, s, st, p, u in rows]
 
     def claims(self, status=None):

@@ -142,13 +142,20 @@ python -m nyaya
 
 Then open `report.html` in a browser.
 
-Local API (the React UI comes next):
+Build the UI once (Node 22+), then launch. The launcher opens your browser with a one-time key:
 
 ```
+cd ui
+npm install
+npm run build
+cd ..
 python -m nyaya serve
 ```
 
-It prints a one-time token. The API listens on 127.0.0.1 only and every call needs that token.
+The server listens on 127.0.0.1 only and every API call needs that key. Use `python -m nyaya serve --no-browser` to only print the address.
+For UI development run `npm run dev` in `ui/` while the server is running, and open the dev address followed by `/#token=<key printed by the server>`.
+
+Analysis needs a local model: install [Ollama](https://ollama.com), then `ollama pull llama3.2:3b` and `ollama pull all-minilm`. The demo case needs no model.
 
 To reproduce the NPU benchmark (needs a free Qualcomm AI Hub account):
 
@@ -161,8 +168,9 @@ python benchmarks/profile_embedder.py
 ## Repository
 
 ```
-nyaya/                    pipeline package: parse, verify, compare, omissions, report, cli
-tests/                    golden test on the sample case
+nyaya/                    pipeline package: parse, verify, compare, omissions, vault, store, api, cli
+ui/                       React + Vite + Tailwind + shadcn front end (builds into nyaya/web)
+tests/                    run each with python tests/<file>.py
 sample_case/              fictional case: statements, case.json, claims.json
 benchmarks/               Qualcomm AI Hub profiling script
 docs/                     screenshots
