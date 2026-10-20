@@ -165,11 +165,23 @@ qai-hub configure --api_token YOUR_TOKEN
 python benchmarks/profile_embedder.py
 ```
 
+## Website
+
+`site/` is the public marketing and documentation site (Home, Features, How it works, Security, Docs, Get started, FAQ, About, Contact, Privacy, Terms). It is separate from the local app and needs no server logic.
+
+```
+cd site
+npm install
+npm run dev      # develop
+npm run build    # static output in site/dist (also writes 404.html for single-page hosting)
+```
+
 ## Repository
 
 ```
 nyaya/                    pipeline package: parse, verify, compare, omissions, vault, store, api, cli
-ui/                       React + Vite + Tailwind + shadcn front end (builds into nyaya/web)
+ui/                       React + Vite + Tailwind + shadcn app (builds into nyaya/web)
+site/                     public website: 11 pages, React Bits components (npm run build -> site/dist)
 tests/                    run each with python tests/<file>.py
 sample_case/              fictional case: statements, case.json, claims.json
 benchmarks/               Qualcomm AI Hub profiling script
