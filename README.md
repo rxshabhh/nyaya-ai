@@ -4,7 +4,7 @@
 
 Nyaya AI reads a case folder and flags where a witness's court testimony **contradicts**, or **leaves out**, something from their earlier police statement. Every quote is checked against the source by code, and no file leaves the laptop.
 
-![A contradiction found by Nyaya AI](docs/Contradictions.png.png)
+![A contradiction found by Nyaya AI](docs/Contradictions.png)
 
 ## Why
 
