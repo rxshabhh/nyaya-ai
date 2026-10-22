@@ -57,7 +57,7 @@ with tempfile.TemporaryDirectory() as tmp:
     # create a case; short passphrase refused
     assert c.post("/api/cases", headers=H, json={"label": "A", "passphrase": "short"}).status_code == 400
     case = c.post("/api/cases", headers=H, json={"label": "Case A", "passphrase": PASS}).json()["id"]
-    assert c.get("/api/cases", headers=H).json() == [{"id": case, "label": "Case A", "unlocked": True}]
+    assert c.get("/api/cases", headers=H).json() == [{"id": case, "label": "Case A", "unlocked": True, "cloud_version": None}]
 
     # uploads: good files, then every kind of bad one
     meta = json.loads((CASE / "case.json").read_text(encoding="utf-8"))["documents"]

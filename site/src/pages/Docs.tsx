@@ -21,7 +21,7 @@ const SECTIONS = [
   { id: 'analysis', title: 'Running an analysis' },
   { id: 'findings', title: 'Reading findings' },
   { id: 'backup', title: 'Backup and restore' },
-  { id: 'cli', title: 'Command line' },
+  { id: 'cloud', title: 'Cloud sync' },
   { id: 'format', title: 'Claims file format' },
   { id: 'troubleshooting', title: 'Troubleshooting' },
 ]
@@ -37,7 +37,7 @@ export default function Docs() {
   return (
     <>
       <PageHeader eyebrow="Documentation" title="Using Nyaya AI" lead="From installing to reading your first finding." />
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 grid-cols-[minmax(0,1fr)] lg:grid-cols-[14rem_minmax(0,1fr)]">
+      <div className="grid w-full gap-10 px-6 lg:px-10 py-12 grid-cols-[minmax(0,1fr)] lg:grid-cols-[14rem_minmax(0,1fr)]">
         <nav aria-label="On this page" className="hidden lg:block">
           <ul className="sticky top-20 grid gap-1 text-sm">
             {SECTIONS.map((s) => <li key={s.id}><a href={`#${s.id}`} className="text-muted-foreground hover:text-foreground block rounded px-2 py-1">{s.title}</a></li>)}
@@ -50,12 +50,12 @@ export default function Docs() {
           <div className="mt-4"><Code>{`git clone https://github.com/rxshabhh/nyaya-ai.git
 cd nyaya-ai
 pip install -r requirements.txt
-cd ui
+cd site
 npm install
 npm run build
 cd ..
-python -m nyaya serve`}</Code></div>
-          <P>Your browser opens on the local app. The address contains a one-time key that is created on every launch, so the page works only in the window the launcher opened. Run <K>python -m nyaya serve --no-browser</K> to print the address without opening it.</P>
+python -m nyaya`}</Code></div>
+          <P>Your browser opens this website on the <strong>Open app</strong> page, served from your own laptop. The address contains a one-time key that is created on every launch, so the app works only in the window the launcher opened. Run <K>python -m nyaya --no-browser</K> to print the address without opening it.</P>
           <P>For a first look, choose <strong>Try the demo case</strong>. It loads a fictional case with planted errors and needs no AI model.</P>
 
           <H id="documents">Adding documents</H>
@@ -89,10 +89,9 @@ ollama pull all-minilm`}</Code></div>
           <H id="backup">Backup and restore</H>
           <P>Use the download button on a case to save an encrypted <K>.nyaya</K> archive. It holds only ciphertext and needs the same passphrase to open. To restore, choose <strong>Restore archive</strong> on the case list, give it a code name, and unlock it with its original passphrase.</P>
 
-          <H id="cli">Command line</H>
-          <P>The original report mode still works on a folder of statements with <K>case.json</K> and <K>claims.json</K>:</P>
-          <div className="mt-3"><Code>{`python -m nyaya sample_case
-# 8 verified, 3 rejected, 2 contradictions, 3 omissions -> report.html`}</Code></div>
+          <H id="cloud">Cloud sync (optional)</H>
+          <P>To open the same case on another laptop, enter the API address, region and client id from your administrator in the <strong>Cloud sync</strong> card, then sign in with your email, password and authenticator code. Open a case, go to <strong>Settings</strong> and choose <strong>Upload to cloud</strong>. Only the encrypted archive is uploaded.</P>
+          <P>Choose <strong>Show what the cloud stores</strong> to fetch the cloud copy back and see it as AWS holds it: the index row, each encrypted file with its first bytes, and a search for every word of the case. It should say none were found.</P>
 
           <H id="format">Claims file format</H>
           <P>Each claim must carry a citation and an exact quote. Date, time, place and amount are optional and, if present, must appear inside the quote.</P>
@@ -100,8 +99,8 @@ ollama pull all-minilm`}</Code></div>
 
           <H id="troubleshooting">Troubleshooting</H>
           <ul className="text-muted-foreground mt-3 list-disc space-y-2 pl-5">
-            <li><strong>“Open Nyaya AI from the launcher”:</strong> the page has no key. Close the tab and use the window <K>python -m nyaya serve</K> opens, or open the printed address.</li>
-            <li><strong>“UI not built yet”:</strong> run <K>npm run build</K> in the <K>ui</K> folder.</li>
+            <li><strong>“Start Nyaya AI on your laptop”:</strong> the page has no key. Close the tab and use the window <K>python -m nyaya</K> opens, or open the printed address.</li>
+            <li><strong>“Website not built yet”:</strong> run <K>npm install</K> and <K>npm run build</K> in the <K>site</K> folder.</li>
             <li><strong>Analysis stopped, Ollama not answering:</strong> start Ollama and check that the model is pulled.</li>
             <li><strong>A document was refused:</strong> it is scanned, an unsupported type, over 50 MB, or a document with that name is already in the case.</li>
             <li><strong>“Case locked after being idle”:</strong> cases lock after 15 idle minutes. Unlock again with the passphrase.</li>

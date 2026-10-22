@@ -5,6 +5,7 @@ import os
 import re
 import secrets
 import shutil
+import contextlib
 import tempfile
 import threading
 import time
@@ -18,7 +19,9 @@ from starlette.background import BackgroundTask
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from .backends import BackendUnavailable, ollama_embed, ollama_generate
+from .archive import ArchiveError, digest, read_archive, write_archive
+from .backends import GEMINI_MODEL, BackendUnavailable, gemini_generate, ollama_embed, ollama_generate, using_gemini
+from .cloud import Cloud, CloudError, check_config
 from .extract import extract_claims
 from .parse import ParseError, build_paras
 from .pipeline import analyze
@@ -28,13 +31,19 @@ from .vault import Vault, VaultError, WrongPassphrase
 DOCTYPES = {"police_statement": "earlier", "fir": "earlier", "chargesheet": "earlier",
             "examination_in_chief": "court", "cross_examination": "court"}
 MAX_UPLOAD = 50 * 1024 * 1024
-MAX_ARCHIVE = 2 * 1024 ** 3  # unpacked size cap for an imported .nyaya file
 IDLE_SECONDS = 15 * 60
 DEMO = Path(__file__).resolve().parent.parent / "sample_case"
-WEB = Path(__file__).resolve().parent / "web"  # React build output (ui/ -> npm run build)
+WEB = Path(__file__).resolve().parent.parent / "site" / "dist"  # the website, app included (site/ -> npm run build)
 # The page shows privileged text: only our own scripts, no external fetches, no framing
 CSP = ("default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; "
        "connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'")
+
+
+class Website(StaticFiles):
+    # Page routes such as /app or /features are handled by the React router, so they get index.html
+    async def get_response(self, path, scope):
+        r = await super().get_response(path, scope)
+        return await super().get_response("index.html", scope) if r.status_code == 404 and "." not in path else r
 
 
 class Session:
@@ -61,13 +70,39 @@ class FindingState(BaseModel):
     state: str
 
 
+class CloudConfig(BaseModel):
+    api_url: str
+    region: str
+    client_id: str
+
+
+class CloudLogin(BaseModel):
+    username: str
+    password: str
+
+
+class Code(BaseModel):
+    code: str
+
+
+class PullRequest(BaseModel):
+    label: str | None = None
+    force: bool = False
+
+
 def create_app(data_dir, token, port=8765, idle_seconds=IDLE_SECONDS, kdf=None, extra_origins=(),
-               generate_factory=None, embed_factory=None):
+               generate_factory=None, embed_factory=None, cloud_factory=None):
     data_dir = Path(data_dir)
     (data_dir / "cases").mkdir(parents=True, exist_ok=True)
     registry_path = data_dir / "cases.json"
-    generate_factory = generate_factory or (lambda model: ollama_generate(model or "llama3.2:3b"))
-    embed_factory = embed_factory or ollama_embed
+    cloud_path = data_dir / "cloud.json"  # endpoints only (no secrets); sign-in tokens stay in memory
+    # NYAYA_COGNITO_ENDPOINT points sign-in at a local fake (infra/tests/fakecloud.py); https or loopback only
+    cloud_factory = cloud_factory or (lambda cfg: Cloud(cfg, cognito_endpoint=os.environ.get("NYAYA_COGNITO_ENDPOINT")))
+    # Gemini while GEMINI_API_KEY is set (a stand-in), else Ollama on this machine. Gemini runs without the
+    # embedder, so claims outside the event vocabulary are not paired by meaning.
+    generate_factory = generate_factory or (
+        lambda model: gemini_generate(model or GEMINI_MODEL) if using_gemini() else ollama_generate(model or "llama3.2:3b"))
+    embed_factory = embed_factory or (lambda: None if using_gemini() else ollama_embed())
     hosts = {"127.0.0.1", "localhost"}
     origins = {f"http://{h}:{port}" for h in hosts} | set(extra_origins)
     sessions, jobs, reg_lock = {}, {}, threading.Lock()
@@ -173,9 +208,16 @@ def create_app(data_dir, token, port=8765, idle_seconds=IDLE_SECONDS, kdf=None, 
 
     api = APIRouter(prefix="/api", dependencies=[Depends(auth)])
 
+    @api.get("/model")
+    def model_backend():
+        if using_gemini():
+            return {"backend": "gemini", "default_model": GEMINI_MODEL, "local": False}
+        return {"backend": "ollama", "default_model": "llama3.2:3b", "local": True}
+
     @api.get("/cases")
     def list_cases():
-        return [{"id": i, "label": c["label"], "unlocked": i in sessions} for i, c in load_registry().items()]
+        return [{"id": i, "label": c["label"], "unlocked": i in sessions, "cloud_version": c.get("cloud", {}).get("version")}
+                for i, c in load_registry().items()]
 
     @api.post("/cases", status_code=201)
     def new_case(body: NewCase):
@@ -201,41 +243,28 @@ def create_app(data_dir, token, port=8765, idle_seconds=IDLE_SECONDS, kdf=None, 
         s = sessions.get(case_id)
         tmp = tempfile.NamedTemporaryFile(suffix=".nyaya", delete=False)
         tmp.close()
-        with s.lock if s else threading.RLock():  # no write lands halfway through the copy
-            with zipfile.ZipFile(tmp.name, "w", zipfile.ZIP_STORED) as z:
-                for f in sorted(case_path(case_id).rglob("*")):
-                    if f.is_file():
-                        z.write(f, f.relative_to(case_path(case_id)).as_posix())
+        with s.lock if s else contextlib.nullcontext():  # no write lands halfway through the copy
+            write_archive(case_path(case_id), tmp.name)
         name = re.sub(r"[^\w.-]+", "_", load_registry()[case_id]["label"]) or "case"
         return FileResponse(tmp.name, media_type="application/octet-stream", filename=f"{name}.nyaya",
                             background=BackgroundTask(os.unlink, tmp.name))
 
+    def register(case_id, label, **extra):
+        with reg_lock:
+            reg = load_registry()
+            reg[case_id] = {"label": label.strip() or "Imported case", **extra}
+            save_registry(reg)
+        return reg[case_id]
+
     @api.post("/cases/import", status_code=201)
     def import_case(file: UploadFile = File(...), label: str = Form(...)):
         case_id = secrets.token_hex(8)
-        dest = case_path(case_id)
         try:
-            with zipfile.ZipFile(file.file) as z:
-                names = z.namelist()
-                ok = lambda n: n in ("vault.json", "manifest.enc") or re.fullmatch(r"(files|state)/[\w.-]+\.enc", n)
-                if "vault.json" not in names or not all(ok(n) for n in names):  # also rejects ../ and absolute paths
-                    raise HTTPException(422, "this is not a Nyaya AI case archive")
-                if sum(i.file_size for i in z.infolist()) > MAX_ARCHIVE:
-                    raise HTTPException(413, "archive is too large")
-                for n in names:
-                    (dest / n).parent.mkdir(parents=True, exist_ok=True)
-                    (dest / n).write_bytes(z.read(n))
-        except zipfile.BadZipFile:
-            shutil.rmtree(dest, ignore_errors=True)
-            raise HTTPException(422, "this is not a Nyaya AI case archive")
-        except HTTPException:
-            shutil.rmtree(dest, ignore_errors=True)
-            raise
-        with reg_lock:
-            reg = load_registry()
-            reg[case_id] = {"label": label.strip() or "Imported case"}
-            save_registry(reg)
-        return {"id": case_id, "label": reg[case_id]["label"]}  # still locked: needs its passphrase
+            read_archive(file.file, case_path(case_id))
+        except ArchiveError as e:
+            shutil.rmtree(case_path(case_id), ignore_errors=True)
+            raise HTTPException(e.status, str(e))
+        return {"id": case_id, "label": register(case_id, label)["label"]}  # still locked: needs its passphrase
 
     @api.post("/cases/{case_id}/unlock")
     def unlock(case_id: str, body: Passphrase):
@@ -350,9 +379,163 @@ def create_app(data_dir, token, port=8765, idle_seconds=IDLE_SECONDS, kdf=None, 
             raise HTTPException(404, "no such finding")
         return {"key": key, "state": body.state}
 
+    # ---- optional cloud sync (see infra/ and docs/aws/): moves encrypted archives, nothing else ----
+    cloud = {"c": cloud_factory(json.loads(cloud_path.read_text(encoding="utf-8"))) if cloud_path.exists() else None}
+
+    def need_cloud(signed=True):
+        c = cloud["c"]
+        if c is None:
+            raise HTTPException(409, "Cloud sync is not set up. Add the endpoints from your administrator first.")
+        if signed and not c.signed_in:
+            raise HTTPException(409, "Sign in to the cloud first.")
+        return c
+
+    def via_cloud(fn, *args):
+        try:
+            return fn(*args)
+        except CloudError as e:
+            raise HTTPException(e.status if 400 <= e.status < 600 else 502, str(e))
+
+    @api.get("/cloud")
+    def cloud_status():
+        c = cloud["c"]
+        return {"configured": c is not None, "signed_in": bool(c and c.signed_in), "user": c.username if c else None,
+                "waiting_for_code": bool(c and c.pending), "config": c.cfg if c else None}
+
+    @api.put("/cloud/config")
+    def cloud_config(body: CloudConfig):
+        cfg = via_cloud(check_config, body.model_dump())
+        cloud_path.write_text(json.dumps(cfg, indent=2), encoding="utf-8")
+        cloud["c"] = cloud_factory(cfg)
+        return cloud_status()
+
+    @api.delete("/cloud/config")
+    def cloud_disconnect():
+        cloud_path.unlink(missing_ok=True)
+        cloud["c"] = None
+        return cloud_status()
+
+    @api.post("/cloud/login")
+    def cloud_login(body: CloudLogin):
+        return via_cloud(need_cloud(signed=False).login, body.username.strip(), body.password)
+
+    @api.post("/cloud/mfa")
+    def cloud_mfa(body: Code):
+        return via_cloud(need_cloud(signed=False).submit_code, body.code)
+
+    @api.post("/cloud/logout")
+    def cloud_logout():
+        if cloud["c"]:
+            cloud["c"].sign_out()
+        return cloud_status()
+
+    @api.get("/cloud/cases")
+    def cloud_cases():
+        reg = load_registry()
+        return [{**r, "local": r["id"] in reg, "label": reg.get(r["id"], {}).get("label"),
+                 "synced_version": reg.get(r["id"], {}).get("cloud", {}).get("version")}
+                for r in via_cloud(need_cloud().list_cases)]
+
+    @api.get("/cases/{case_id}/cloud")
+    def case_cloud(case_id: str):
+        known(case_id)
+        c = load_registry()[case_id].get("cloud")
+        return {"version": c["version"] if c else None,
+                "dirty": c is None or digest(case_path(case_id)) != c["digest"]}  # changed since the last sync
+
+    @api.post("/cases/{case_id}/cloud/push")
+    def cloud_push(case_id: str):
+        cl = need_cloud()
+        known(case_id)
+        s = sessions.get(case_id)
+        base = load_registry()[case_id].get("cloud", {}).get("version", 0)
+        tmp = tempfile.NamedTemporaryFile(suffix=".nyaya", delete=False)
+        tmp.close()
+        try:
+            with s.lock if s else contextlib.nullcontext():  # snapshot under the lock, upload outside it
+                write_archive(case_path(case_id), tmp.name)
+                snapshot = digest(case_path(case_id))
+            version = via_cloud(cl.push, case_id, tmp.name, base)
+        finally:
+            os.unlink(tmp.name)
+        with reg_lock:
+            reg = load_registry()
+            reg[case_id]["cloud"] = {"version": version, "digest": snapshot}
+            save_registry(reg)
+        return {"version": version}
+
+    @api.get("/cases/{case_id}/cloud/inspect")
+    def cloud_inspect(case_id: str):
+        # Proof for the advocate: fetch the latest cloud copy and show exactly what AWS holds, and whether
+        # any word of this case's readable text appears anywhere in it
+        cl = need_cloud()
+        s = session(case_id)  # unlocked, so the readable words can be listed for the search
+        with s.lock:
+            words = {w for t in s.vault.paras().values() for w in re.findall(r"[A-Za-z]{5,}", t)} | set(s.vault.docs())
+        tmp = tempfile.NamedTemporaryFile(suffix=".nyaya", delete=False)
+        tmp.close()
+        try:
+            version = via_cloud(cl.pull, case_id, tmp.name)
+            size = os.path.getsize(tmp.name)
+            with zipfile.ZipFile(tmp.name) as z:
+                blobs = {n: z.read(n) for n in z.namelist()}
+        except zipfile.BadZipFile:
+            raise HTTPException(502, "The cloud copy is not a valid archive")
+        finally:
+            os.unlink(tmp.name)
+        # vault.json is readable on purpose (key-derivation settings and the wrapped key), so it is listed, not searched
+        enc = [b for n, b in blobs.items() if n != "vault.json"]
+        return {"version": version, "size": size,
+                "index": next((r for r in via_cloud(cl.list_cases) if r["id"] == case_id), None),
+                "files": [{"name": n, "size": len(b), "starts": b[:16].hex()} for n, b in blobs.items()],
+                "words_checked": len(words), "found": sorted(w for w in words if any(w.encode() in b for b in enc))}
+
+    @api.post("/cloud/cases/{case_id}/pull")
+    def cloud_pull(case_id: str, body: PullRequest):
+        cl = need_cloud()
+        local = load_registry().get(case_id)
+        if local:  # refuse to silently destroy work that was never uploaded
+            c = local.get("cloud")
+            if not body.force and (c is None or digest(case_path(case_id)) != c["digest"]):
+                raise HTTPException(409, "This laptop has changes that were never uploaded. Downloading replaces them.")
+        tmp = tempfile.NamedTemporaryFile(suffix=".nyaya", delete=False)
+        tmp.close()
+        staging = data_dir / "cases" / f"{case_id}.new"
+        old = data_dir / "cases" / f"{case_id}.old"
+        try:
+            version = via_cloud(cl.pull, case_id, tmp.name)
+            shutil.rmtree(staging, ignore_errors=True)
+            try:
+                with open(tmp.name, "rb") as f:
+                    read_archive(f, staging)
+            except ArchiveError as e:
+                raise HTTPException(502, f"The cloud copy is not a valid archive: {e}")
+            sessions.pop(case_id, None)  # the passphrase may differ in the cloud copy; unlock again
+            shutil.rmtree(old, ignore_errors=True)
+            if case_path(case_id).exists():
+                os.replace(case_path(case_id), old)
+            os.replace(staging, case_path(case_id))
+            shutil.rmtree(old, ignore_errors=True)
+        finally:
+            os.unlink(tmp.name)
+            shutil.rmtree(staging, ignore_errors=True)
+        label = (local or {}).get("label") or (body.label or "").strip() or f"Cloud case {case_id[:4]}"
+        register(case_id, label, cloud={"version": version, "digest": digest(case_path(case_id))})
+        return {"id": case_id, "label": label, "version": version, "replaced": bool(local)}
+
+    @api.delete("/cloud/cases/{case_id}")
+    def cloud_delete(case_id: str):
+        via_cloud(need_cloud().delete, case_id)
+        with reg_lock:
+            reg = load_registry()
+            if case_id in reg:
+                reg[case_id].pop("cloud", None)
+                save_registry(reg)
+        return {"deleted": True}
+
     app.include_router(api)
     if WEB.is_dir():
-        app.mount("/", StaticFiles(directory=WEB, html=True), name="web")
+        app.mount("/", Website(directory=WEB, html=True), name="web")
     return app
 
 
@@ -365,10 +548,10 @@ def serve(port=8765, data_dir=None, browser=True):
     import webbrowser
     token = secrets.token_urlsafe(32)
     app = create_app(data_dir or default_data_dir(), token, port)
-    url = f"http://127.0.0.1:{port}/#token={token}"  # fragment: never sent to the server or written to logs
+    url = f"http://127.0.0.1:{port}/app#token={token}"  # fragment: never sent to the server or written to logs
     print(f"Nyaya AI on {url}", flush=True)
     if not WEB.is_dir():
-        print("UI not built yet: cd ui && npm install && npm run build  (the API works without it)", flush=True)
+        print("Website not built yet: cd site && npm install && npm run build  (the API works without it)", flush=True)
     elif browser:
         threading.Timer(1.0, webbrowser.open, [url]).start()
     uvicorn.run(app, host="127.0.0.1", port=port, log_level="warning")

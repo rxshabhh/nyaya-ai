@@ -142,5 +142,11 @@
   --border: oklch(0.9 0.008 85);
   --accent-warm: oklch(0.72 0.15 65);
 }
-html { scroll-behavior: smooth; }
+/* 18px base: readable on a projector; every rem-based size scales with it */
+html { scroll-behavior: smooth; font-size: 112.5%; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+/* Printing findings from the app: just the findings, no site chrome */
+@media print {
+  body { background: #fff; color: #000; }
+  body > #root > div > header, body > #root > div > footer { display: none; }
+}

@@ -7,7 +7,7 @@ import { REPO } from '@/content'
 const REQS = [
   ['Windows 11', 'Any laptop. Snapdragon X (ARM64) is the target, but the CPU works everywhere.'],
   ['Python 3.11+', 'Runs the pipeline and the local app.'],
-  ['Node 22+', 'Only to build the screen, once.'],
+  ['Node 22+', 'Only to build the website, once.'],
   ['Ollama', 'Runs the language model on your laptop. Needed for your own cases, not for the demo.'],
 ]
 
@@ -35,16 +35,16 @@ cd nyaya-ai
 pip install -r requirements.txt`}</Code>
           </li>
           <li>
-            <h3 className="mb-2 font-semibold">2. Build the screen, once</h3>
-            <Code>{`cd ui
+            <h3 className="mb-2 font-semibold">2. Build the website, once</h3>
+            <Code>{`cd site
 npm install
 npm run build
 cd ..`}</Code>
           </li>
           <li>
             <h3 className="mb-2 font-semibold">3. Launch</h3>
-            <Code>python -m nyaya serve</Code>
-            <p className="text-muted-foreground mt-2 text-sm">Your browser opens. Choose “Try the demo case”, pick a passphrase, and open the Findings tab.</p>
+            <Code>python -m nyaya</Code>
+            <p className="text-muted-foreground mt-2 text-sm">Your browser opens this website from your laptop, on the app page. Choose “Try the demo case”, pick a passphrase, and open the Findings tab. The demo needs no AI model.</p>
           </li>
         </ol>
         <div className="mt-8 flex flex-wrap gap-3">

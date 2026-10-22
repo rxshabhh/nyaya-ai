@@ -38,7 +38,7 @@ export const FEATURES = [
   },
   {
     title: 'Works fully offline',
-    body: 'No account, no cloud, no telemetry. The local AI model runs on your laptop and the app refuses to send text to any other address.',
+    body: 'No telemetry. The local AI model runs on your laptop. The optional cloud locker stores only encrypted archives that AWS cannot read.',
   },
   {
     title: 'Built for Snapdragon X',
@@ -64,7 +64,7 @@ export const AUDIENCE = [
 export const FAQ = [
   {
     q: 'Does any of my case data leave my laptop?',
-    a: 'No. There is no account, no cloud service and no telemetry. The language model runs locally through Ollama, and the app refuses to contact any address other than your own machine. Documents and findings are stored encrypted on disk.',
+    a: 'No. There is no telemetry, and the optional cloud locker only stores encrypted archives that AWS cannot read. The language model runs locally through Ollama, and the app refuses to contact any address other than your own machine. Documents and findings are stored encrypted on disk.',
   },
   {
     q: 'Can the AI invent a quote or a page number?',
@@ -113,7 +113,7 @@ export const STATUS = [
 
 export const PRIVACY = [
   ['What this covers', 'This policy covers the Nyaya AI software you run on your own computer and this website.'],
-  ['The software collects nothing', 'Nyaya AI has no account, no cloud service and no telemetry. It does not send case files, findings, usage data or crash reports anywhere. Language-model work is done by Ollama on your machine, and the software refuses any model address that is not your own machine.'],
+  ['The software collects nothing', 'Nyaya AI has no telemetry. It never sends readable case files, findings, usage data or crash reports anywhere. The optional cloud locker (an AWS account from your administrator) receives only encrypted archives. Language-model work is done by Ollama on your machine, and the software refuses any model address that is not your own machine.'],
   ['What is stored on your computer', 'Each case is a folder holding encrypted documents, an encrypted index of document names and details, and an encrypted findings database. They are encrypted with AES-256-GCM under a random key that is itself locked by a key derived from your passphrase with Argon2id. The case code name you type is the one thing stored unencrypted, so the case list can show it. Do not use a client’s name as a code name.'],
   ['Your passphrase', 'It is never stored and cannot be recovered. If you lose it, nobody, including us, can open the case.'],
   ['While a case is open', 'The case key is held in memory while a case is unlocked. Cases lock after 15 idle minutes or when you press Lock. Anyone who can use your unlocked computer can read an unlocked case. Python cannot guarantee that memory is wiped, so the protection is aimed at a lost or stolen laptop, not at an attacker inspecting a running machine.'],

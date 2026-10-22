@@ -11,18 +11,26 @@ import { Faq, Section, useTitle } from '@/components/bits'
 import { Button } from '@/components/ui/button'
 import { AUDIENCE, FAQ, FEATURES, STEPS } from '@/content'
 
+// Dated, sourced items for the "why now" argument. Check the source before quoting a figure.
+const NEWS = [
+  { date: 'Jul 2026', title: 'More than 5.64 crore cases pending across Indian courts', body: 'Government reply in Parliament, using National Judicial Data Grid figures.', src: 'https://telanganatoday.com/more-than-5-64-crore-cases-pending-across-indian-courts-rs' },
+  { date: '27 Feb 2026', title: 'Supreme Court: relying on fake AI judgments is misconduct', body: 'A trial court cited four non-existent, AI-generated judgments (Gummadi Usha Rani v. Sure Mallikarjuna Rao).', src: 'https://www.barandbench.com/amp/story/news/litigation/judges-citing-fake-ai-generated-case-laws-amounts-to-misconduct-supreme-court' },
+  { date: '13 Nov 2025', title: 'DPDP Rules, 2025 notified', body: 'Client data is personal data: security safeguards such as encryption, and breach notification.', src: 'https://www.dsci.in/resource/content/insight-brief-digital-personal-data-protection-rules-2025' },
+  { date: '23 May 2024', title: 'Stanford: legal AI tools hallucinate in 1 of 6 queries or more', body: 'Even purpose-built legal research tools produced wrong answers in benchmark tests.', src: 'https://hai.stanford.edu/news/ai-trial-legal-models-hallucinate-1-out-6-or-more-benchmarking-queries' },
+] as const
+
 const PILLARS = [
   { icon: ScanSearch, title: 'Finds the conflicts', body: 'Contradictions and material omissions between court testimony and earlier statements.' },
   { icon: FileSearch, title: 'Cites every one', body: 'Both quotes, side by side, with document, page and paragraph.' },
   { icon: ShieldCheck, title: 'Never invents', body: 'Code checks each quote against the source before you see it.' },
-  { icon: WifiOff, title: 'Stays on your laptop', body: 'Offline. Encrypted at rest. No account, no cloud, no telemetry.' },
+  { icon: WifiOff, title: 'Stays on your laptop', body: 'Offline and encrypted at rest. The optional AWS locker only ever holds ciphertext.' },
 ]
 
 function Hero() {
   return (
     <section className="relative overflow-hidden border-b">
       <div aria-hidden className="pointer-events-none absolute inset-0 [background:radial-gradient(60rem_30rem_at_70%_-10%,oklch(0.9_0.06_265/.5),transparent),radial-gradient(40rem_25rem_at_0%_20%,oklch(0.93_0.08_75/.45),transparent)]" />
-      <div className="relative mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:py-24 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+      <div className="relative grid w-full gap-10 px-6 lg:px-10 py-10 sm:py-14 lg:grid-cols-[1.05fr_1fr] lg:items-center">
         <div>
           <p className="bg-background/70 mb-5 inline-flex rounded-full border px-3 py-1 text-sm">
             <ShinyText text="Offline cross-examination prep for Indian advocates" speed={4} color="oklch(0.35 0.03 265)" shineColor="oklch(0.2 0.1 265)" />
@@ -44,7 +52,7 @@ function Hero() {
         </div>
         <FadeContent blur duration={0.9} delay={0.2} trigger="mount">
           <figure className="bg-card overflow-hidden rounded-2xl border shadow-xl">
-            <img src="/img/app-findings.png" alt="Nyaya AI listing two contradictions and three omissions for a fictional robbery case, each with side-by-side quotes and Confirm and Dismiss buttons" width="1100" height="1310" className="w-full object-cover object-top" style={{ maxHeight: 520 }} />
+            <img src="/img/app-findings.png" alt="Nyaya AI listing two contradictions and three omissions for a fictional robbery case, each with side-by-side quotes and Confirm and Dismiss buttons" width="1274" height="1475" className="w-full object-cover object-top" style={{ maxHeight: 520 }} />
             <figcaption className="text-muted-foreground border-t px-4 py-2 text-xs">The app on a fictional demo case.</figcaption>
           </figure>
         </FadeContent>
@@ -86,6 +94,23 @@ export default function Home() {
             <p className="text-muted-foreground mt-2 text-sm">Uploading them to a cloud AI risks client confidentiality, and general chatbots invent quotes. Nyaya AI does neither.</p>
           </SpotlightCard>
         </div>
+      </Section>
+
+      <Section title="In the news" lead="Why a careful, offline tool matters now.">
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {NEWS.map((n) => (
+            <li key={n.title}>
+              <a href={n.src} target="_blank" rel="noreferrer" className="group block h-full">
+                <SpotlightCard theme="light" className="bg-card h-full rounded-2xl border p-5 transition-shadow group-hover:shadow-md">
+                  <span className="bg-primary text-primary-foreground inline-block rounded-full px-3 py-0.5 text-sm font-medium">{n.date}</span>
+                  <p className="mt-3 font-semibold leading-snug">{n.title}</p>
+                  <p className="text-muted-foreground mt-2 text-sm">{n.body}</p>
+                  <p className="text-primary mt-3 text-sm font-medium group-hover:underline">Source <ArrowRight className="inline size-3.5" aria-hidden /></p>
+                </SpotlightCard>
+              </a>
+            </li>
+          ))}
+        </ul>
       </Section>
 
       <Section title="The model proposes. Code verifies." lead="A small language model only extracts claims. Nothing it says reaches you until the software has checked it against the document.">
@@ -154,7 +179,7 @@ export default function Home() {
       </Section>
 
       <section className="bg-primary text-primary-foreground">
-        <div className="mx-auto max-w-6xl px-4 py-16 text-center">
+        <div className="w-full px-6 lg:px-10 py-12 text-center">
           <h2 className="text-3xl font-semibold tracking-tight text-balance">Try it on the demo case in two minutes.</h2>
           <p className="mx-auto mt-3 max-w-xl opacity-80">The demo case is fictional and needs no AI model. See real contradictions, omissions and rejected claims first, then use your own files.</p>
           <Button asChild size="lg" variant="secondary" className="mt-8 h-11 px-6 text-base"><Link to="/get-started">Get started <ArrowRight /></Link></Button>

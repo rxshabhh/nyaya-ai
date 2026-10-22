@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
+import AppPage from '@/pages/AppPage'
 import Docs from '@/pages/Docs'
 import Features from '@/pages/Features'
 import GetStarted from '@/pages/GetStarted'
@@ -14,6 +15,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="app" element={<AppPage />} />
           <Route path="features" element={<Features />} />
           <Route path="how-it-works" element={<HowItWorks />} />
           <Route path="security" element={<Security />} />

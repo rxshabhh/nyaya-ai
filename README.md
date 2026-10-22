@@ -4,7 +4,7 @@
 
 Nyaya AI reads a case folder and flags where a witness's court testimony **contradicts**, or **leaves out**, something from their earlier police statement. Every quote is checked against the source by code, and no file leaves the laptop.
 
-![A contradiction found by Nyaya AI](docs/Contradictions.png.png)
+![A contradiction found by Nyaya AI](docs/Contradictions.png)
 
 ## Why
 
@@ -25,7 +25,7 @@ flowchart LR
   D -- passes --> P[Pair related claims<br/>MiniLM embedder on Hexagon NPU]
   P --> E[Contradictions<br/>date, time, place, amount]
   P --> F[Omissions<br/>ranked by materiality]
-  E --> G[HTML report<br/>Confirm / Dismiss]
+  E --> G[Findings in the app<br/>Confirm / Dismiss]
   F --> G
 ```
 
@@ -107,9 +107,7 @@ No real client data is used or stored.
 
 ## Results on the sample case
 
-```
-8 verified, 3 rejected, 2 contradictions, 3 omissions -> report.html
-```
+8 verified claims, 3 rejected, 2 contradictions, 3 omissions, shown in the app's Findings tab.
 
 - **Verification gate:** rejected **3 of 3** planted false claims: an invented quote, a place not in its quote, and a real quote cited to the wrong paragraph.
 - **Contradictions:** 11 pm at the shop vs 9 pm at the house; Rs. 5,000 vs Rs. 8,000. "Night of 12/13.03.2021" vs "12.03.2021" is correctly **not** flagged.
@@ -128,34 +126,25 @@ No real client data is used or stored.
 
 ## Run it
 
-Python 3.11+.
+Python 3.11+ and Node 22+ (Node only to build the website once).
 
 ```
 pip install -r requirements.txt
-```
-
-Reads `.txt`, digital `.pdf` and `.docx`. Scanned PDFs are refused with a message (no OCR yet).
-
-```
-python -m nyaya
-```
-
-Then open `report.html` in a browser.
-
-Build the UI once (Node 22+), then launch. The launcher opens your browser with a one-time key:
-
-```
-cd ui
+cd site
 npm install
 npm run build
 cd ..
-python -m nyaya serve
+python -m nyaya
 ```
 
-The server listens on 127.0.0.1 only and every API call needs that key. Use `python -m nyaya serve --no-browser` to only print the address.
-For UI development run `npm run dev` in `ui/` while the server is running, and open the dev address followed by `/#token=<key printed by the server>`.
+Your browser opens the Nyaya AI website, served from this laptop, on the **Open app** page with a one-time key. Choose **Try the demo case** and open **Findings**. Reads `.txt`, digital `.pdf` and `.docx`. Scanned PDFs are refused with a message (no OCR yet).
+
+The server listens on 127.0.0.1 only and every API call needs that key. Use `python -m nyaya --no-browser` to only print the address.
+For website development run `npm run dev` in `site/` while the server is running, and open `http://localhost:5173/app#token=<key printed by the server>`.
 
 Analysis needs a local model: install [Ollama](https://ollama.com), then `ollama pull llama3.2:3b` and `ollama pull all-minilm`. The demo case needs no model.
+
+**Stand-in model for now:** if the `GEMINI_API_KEY` environment variable is set (free key from aistudio.google.com/apikey), analysis uses Google Gemini instead of Ollama, and the app says so. That sends paragraph text to Google, so use fictional cases only. The free tier allows about 20 requests a day on `gemini-2.5-flash` (one request per paragraph); change the model with `NYAYA_GEMINI_MODEL`. Remove the variable to go back to Ollama, which is the mode for real cases.
 
 To reproduce the NPU benchmark (needs a free Qualcomm AI Hub account):
 
@@ -167,21 +156,19 @@ python benchmarks/profile_embedder.py
 
 ## Website
 
-`site/` is the public marketing and documentation site (Home, Features, How it works, Security, Docs, Get started, FAQ, About, Contact, Privacy, Terms). It is separate from the local app and needs no server logic.
+`site/` is one website: the public pages (Home, Features, How it works, Security, Docs, Get started, FAQ, About, Contact, Privacy, Terms) and the app itself at `/app` (cases, documents, findings, cloud sync). `python -m nyaya` serves it from `site/dist`. The same build can be hosted on CloudFront as the public site; there `/app` asks the visitor to start Nyaya AI on their own laptop, because case files never go to a server.
 
-```
-cd site
-npm install
-npm run dev      # develop
-npm run build    # static output in site/dist (also writes 404.html for single-page hosting)
-```
+## Cloud (optional) and AWS architecture
+
+The app is offline-first. Optional encrypted sync lets an advocate open the same case on several laptops: only already-encrypted archives are uploaded, so AWS cannot read a case. In the app, a case's **Settings → Show what the cloud stores** fetches the cloud copy back and shows it as AWS holds it, with a search for every word of the case. The AWS design (Cognito, API Gateway, Lambda, S3, DynamoDB, KMS, CloudTrail, CloudFront, all as CDK code in `infra/`), its diagrams, threat model and cost are in [docs/aws/](docs/aws/README.md). Cloud sync can be tried with no AWS account using the local emulator described in [docs/aws/DEPLOY.md](docs/aws/DEPLOY.md).
 
 ## Repository
 
 ```
 nyaya/                    pipeline package: parse, verify, compare, omissions, vault, store, api, cli
-ui/                       React + Vite + Tailwind + shadcn app (builds into nyaya/web)
-site/                     public website: 11 pages, React Bits components (npm run build -> site/dist)
+site/                     the website and the app at /app: React + Vite + Tailwind + shadcn + React Bits (npm run build -> site/dist)
+infra/                    AWS CDK stacks, sync Lambda, cloud tests and a local AWS emulator
+docs/aws/                 cloud architecture review pack
 tests/                    run each with python tests/<file>.py
 sample_case/              fictional case: statements, case.json, claims.json
 benchmarks/               Qualcomm AI Hub profiling script

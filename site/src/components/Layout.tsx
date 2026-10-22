@@ -23,13 +23,14 @@ function Header() {
   useEffect(() => { setOpen(false) }, [pathname])
   return (
     <header className="bg-background/85 sticky top-0 z-40 border-b backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
+      <div className="flex h-14 w-full items-center justify-between gap-4 px-6 lg:px-10">
         <Brand />
         <nav aria-label="Main" className="hidden items-center md:flex">
           {NAV.map((n) => <NavLink key={n.to} to={n.to} className={linkClass}>{n.label}</NavLink>)}
         </nav>
         <div className="flex items-center gap-2">
-          <Button asChild size="sm" className="hidden sm:inline-flex"><Link to="/get-started">Get started</Link></Button>
+          <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex"><Link to="/get-started">Get started</Link></Button>
+          <Button asChild size="sm" className="hidden sm:inline-flex"><Link to="/app">Open app</Link></Button>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="md:hidden" aria-label="Open menu"><Menu /></Button>
@@ -37,7 +38,7 @@ function Header() {
             <SheetContent side="right" className="w-72">
               <SheetHeader><SheetTitle>Menu</SheetTitle></SheetHeader>
               <nav aria-label="Mobile" className="grid gap-1 px-4">
-                {[...NAV, { to: '/get-started', label: 'Get started' }, { to: '/contact', label: 'Contact' }].map((n) => (
+                {[{ to: '/app', label: 'Open app' }, ...NAV, { to: '/get-started', label: 'Get started' }, { to: '/contact', label: 'Contact' }].map((n) => (
                   <NavLink key={n.to} to={n.to} className={({ isActive }) => `rounded-md px-3 py-2.5 text-base ${isActive ? 'bg-muted font-medium' : ''}`}>{n.label}</NavLink>
                 ))}
               </nav>
@@ -58,7 +59,7 @@ const COLS = [
 function Footer() {
   return (
     <footer className="bg-muted/50 border-t">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+      <div className="grid w-full gap-8 px-6 lg:px-10 py-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div className="grid content-start gap-3">
           <Brand />
           <p className="text-muted-foreground max-w-xs text-sm">

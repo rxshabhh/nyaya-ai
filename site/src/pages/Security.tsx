@@ -5,7 +5,7 @@ import { PageHeader, Section, useTitle } from '@/components/bits'
 import { Button } from '@/components/ui/button'
 
 const CARDS = [
-  { icon: ServerOff, title: 'Offline by design', body: 'No account, no cloud, no telemetry. The local model address must be this machine; anything else is refused, even if misconfigured.' },
+  { icon: ServerOff, title: 'Offline by design', body: 'No telemetry. Works fully offline. The optional AWS cloud locker receives only encrypted archives, never readable text, passphrases or keys.' },
   { icon: Lock, title: 'Encrypted at rest', body: 'Documents, document names and the findings database are encrypted with AES-256-GCM. There is no plaintext database file. Tampered or swapped files fail to decrypt.' },
   { icon: KeyRound, title: 'Your passphrase is the only key', body: 'A key derived with Argon2id (3 passes, 64 MiB, 4 lanes) locks a random per-case key. Changing the passphrase re-wraps one small key; no document is re-encrypted. Minimum 8 characters.' },
   { icon: ShieldAlert, title: 'Guarded local app', body: 'The app listens on 127.0.0.1 only. Each launch makes a one-time key, and Host and Origin checks stop other web pages in your browser from reaching it. The page ships with a strict content security policy.' },
